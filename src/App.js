@@ -1,9 +1,9 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
-import Main from "./components/Anasayfa";
+import Main from "./pages/Anasayfa";
 import Order from "./components/SiparisFormu";
-import Success from "./components/SiparisOnayi";
-import "./App.css"
+import Success from "./pages/SiparisOnayi";
+import "./App.css";
 
 const App = () => {
   return (
@@ -11,9 +11,8 @@ const App = () => {
       <div className="header">
         <img src="../logo.svg" alt="Logo" />
       </div>
-      
-      <div className="main-main">
 
+      <div className="main-main">
         <Switch>
           <Route exact path="/">
             <Main />
@@ -26,8 +25,7 @@ const App = () => {
           </Route>
         </Switch>
       </div>
-
-    </div >
+    </div>
   );
 };
 export default App;

@@ -18,7 +18,7 @@ const Main = () => {
       <div className="button-container">
 
         <Link to="/pizza">
-          <button id="pizza-siparis" type="button" data-test-id="main-page-link"> ACIKTIM </button>
+          <button id="order-pizza" type="button" data-test-id="main-page-link"> ACIKTIM </button>
         </Link>
 
       </div>

@@ -19,7 +19,7 @@
     transform: scaleY(1.7);
 }
 
-#pizza-siparis {
+#order-pizza {
     width: 10rem;
     height: 3rem;
     border-radius: 25px;
@@ -28,7 +28,7 @@
     font-weight: bold;
 }
 
-#pizza-siparis a {
+#order-pizza a {
     color: black;
     text-decoration: none;
 }

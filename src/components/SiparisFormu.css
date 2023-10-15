@@ -1,4 +1,4 @@
-.siparis-container {
+.order-container {
     background-color: #CE2829;
     display: flex;
     justify-content: center;
@@ -36,26 +36,24 @@
   }
 
   .header-link-bar ul {
-    width: 560px;
+    width: 580px;
     display: flex;
-    color: white;
+    color: rgb(255, 255, 255);
     padding: 0;
     list-style-type: none;
   }
   
   .header-link-bar ul li a {
     text-decoration: none;
-    color: #FAF7F2;
+    color: #ffffff;
   }
   
-  .header-link-bar ul li:hover {
+  .header-link-bar ul li a.active{
+    color: #ffffff;
     font-weight: bold;
+
   }
   
-  span {
-    padding: 0 0.2rem;
-  }
-
   
   .form-first-choice-panel {
     display: flex;
@@ -63,10 +61,15 @@
   
   .select-pizza-size {
     width: 50%;
+    
+    
 
   }
   .select-pizza-size div {
     padding: 0.5rem;
+  }
+  .select-pizza-size label{
+    padding-left: 0.5rem;
   }
   .select-pizza-weight span{
     color: #CE2829;
@@ -78,16 +81,25 @@
   .form-extra-list {
     display: flex;
     flex-wrap: wrap;
+    
+    
   }
-  
+  .radio {
+    margin-right: 10px; 
+  }
+  .checkbox {
+    margin-right: 10px; 
+  }
   .form-extra-list div {
     width: 12rem;
     padding: 0.5rem;
     font-weight: bold;
+    
   }
   
   .form-extra-list div label {
     padding-left: 1rem;
+
   }
   
   .form-text {
@@ -100,9 +112,10 @@
   .form-text label {
     padding: 1rem 0;
     
+    
    
   }
-
+ 
   #name-input {
     border: 0.05rem solid #e6e6e6;
     width: 100%;
