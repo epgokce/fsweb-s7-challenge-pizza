@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useState, useEffect } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import * as Yup from "yup";
 import "./SiparisFormu.css";
-
+import "bootstrap/dist/css/bootstrap.min.css";
+// Ek malzeme listesi
 const ekMalzeme = [
   "Pepperoni",
   "Domates",
@@ -23,6 +23,7 @@ const ekMalzeme = [
 ];
 
 const Order = () => {
+  // State'ler
   const [urunPuani, setUrunPuani] = useState("");
   const [stok, setStok] = useState("");
   const [secilenEkMalzeme, setEkMalzeme] = useState([]);
@@ -33,106 +34,136 @@ const Order = () => {
   const [form, setForm] = useState({});
   const history = useHistory();
 
-  // hata mesaji
+// Form hata durumları
   const [formErrors, setFormErrors] = useState({
-    boyut: '',
-    kalinlik:'' ,
-    name: '',
-    note: '',
+    boyut: "",
+    kalinlik: "",
+    name: "",
+    note: "",
+    extra_materials: "",
   });
-
+  
+// Yup form şeması
   const formSchema = Yup.object().shape({
     boyut: Yup.string().required("En az bir adet seçim yapmalısınız."),
-    kalinlik: Yup.string().required("Pizza hamuru kalınlığını seçiniz."),
+    kalinlik: Yup.string().required("Pizza hamuru kalınlığını seçiniz"),
     name: Yup.string()
       .required("Lütfen bu alanı doldurunuz..")
-      .min(3, "İsim en az 2 karakter olmalıdır"),
+      .min(3, "İsim en az iki karakter olmalıdır."),
     note: Yup.string()
       .required("Lütfen bu alanı doldurunuz..")
-      .min(3, "Not bölümü en az iki karakter olabilir."),
+      .min(3, "Not bölümü en az iki karakter olabilir"),
+    extra_materials: Yup.array()
+    .max(10, "10 malzemeden fazla seçtiniz.")
+      
   });
 
+  // Hata durumlarını kontrol etmek için useEffect
   useEffect(() => {
     console.warn("error:", formErrors);
   }, [formErrors]);
 
-  const handleBoyutChange = (e) => {
+// Boyut ve hamur değişimleri için event handler
+  const handleChangeBoyut = (e) => {
     const { type, name, value } = e.target;
 
-    // Boyut
+// Pizza detayları
     const pizzaDetails = {
       kucuk: { price: 89, rate: 5, stock: 670 },
       orta: { price: 129, rate: 4, stock: 550 },
       buyuk: { price: 159, rate: 3, stock: 500 },
     };
-    // Hamur
+
+// Radio butonlarından gelen değerlere göre pizza detaylarını güncelle
     if (type === "radio" && pizzaDetails[value]) {
       const { price, rate, stock } = pizzaDetails[value];
       setPizzaSiparis(price);
       setUrunPuani(rate);
       setStok(stock);
     }
-    // form yukle
+
+// Form state'ini güncelle
     setForm({ ...form, [name]: value });
-    // yup state
+// Yup şemasına göre validasyon
     Yup.reach(formSchema, name)
       .validate(value)
-      .then((valid) => {
-        setFormErrors({ ...formErrors, [name]: " " });
+      .then(() => {
+        setFormErrors({ ...formErrors, [name]: "" });
       })
       .catch((err) => {
         setFormErrors({ ...formErrors, [name]: err.errors[0] });
       });
   };
 
+// Formun genel geçerliliğini kontrol etmek için useEffect
   useEffect(() => {
     formSchema.isValid(form).then((valid) => {
       setFormDoldur(valid);
     });
   }, [form, formSchema]);
 
-  // ek Malzeme
-  const handleBoyutChangeExtras = (e) => {
+// Ek malzemeleri güncelleme işlemi için event handler
+  const handleChangeExtras = (e) => {
     const { value, checked } = e.target;
     if (checked) {
       setEkMalzeme([...secilenEkMalzeme, value]);
     } else {
       setEkMalzeme(secilenEkMalzeme.filter((item) => item !== value));
     }
+    Yup.reach(formSchema, "extra_materials")
+    .validate([...secilenEkMalzeme, value])
+    .then(() => {
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        extra_materials: "", // Hata olmadığında hatayı temizle
+      }));
+    })
+    .catch((err) => {
+      setFormErrors((prevErrors) => ({
+        ...prevErrors,
+        extra_materials: err.errors[0], // Hata varsa hatayı ayarla
+      }));
+    });
+    
   };
 
-  // forma ekle
+// Ek malzemeleri form state'ine güncelleme işlemi için useEffect
   useEffect(() => {
     setForm({ ...form, extra_materials: secilenEkMalzeme });
   }, [secilenEkMalzeme]);
 
-  // pizza Sayısi
-  const handleBoyutChangeCounter = (e) => {
+// Sipariş adetini güncelleme işlemi için event handler
+  const handleChangeCounter = (e) => {
     if (e.target.id === "decrease" && pizzaSayisi > 0) {
       setPizzaSayisi(pizzaSayisi - 1);
     } else if (e.target.id === "increase" && pizzaSayisi < stok) {
       setPizzaSayisi(pizzaSayisi + 1);
     }
   };
-  // form yukleme
+
+// Sipariş adetini form state'ine güncelleme işlemi için useEffect
   useEffect(() => {
     setForm({ ...form, number_of_pizzas: pizzaSayisi });
   }, [pizzaSayisi]);
 
+// Toplam fiyatı güncelleme işlemi için useEffect
   useEffect(() => {
     setToplamFiyat(
       pizzaSiparis * pizzaSayisi + secilenEkMalzeme.length * 5 * pizzaSayisi
     );
   }, [pizzaSiparis, pizzaSayisi, secilenEkMalzeme]);
-  // form submit
+
+
+  // Form submit işlemi
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formDoldur) {
+      // Axios kullanarak POST request
       axios
         .post("https://reqres.in/api/orders", form)
         .then((res) => {
           console.log("Post Edilen Data Kontrol Edildi:", res.data);
-          history.push("/success");
+          history.push("/success", { orderDetails: {...form, toplamFiyat}  });
         })
         .catch(() => {
           // Handle errors
@@ -187,7 +218,6 @@ const Order = () => {
               pizatta denir.
             </p>
           </div>
-          {/* form */}
           <form id="pizza-form" onSubmit={handleSubmit}>
             <div className="form-one">
               <div className="form-first-choice-panel">
@@ -203,7 +233,7 @@ const Order = () => {
                         id="kucuk"
                         name="boyut"
                         value="kucuk"
-                        onChange={handleBoyutChange}
+                        onChange={handleChangeBoyut}
                       />
                       Küçük
                     </label>
@@ -216,7 +246,7 @@ const Order = () => {
                         id="orta"
                         name="boyut"
                         value="orta"
-                        onChange={handleBoyutChange}
+                        onChange={handleChangeBoyut}
                       />
                       Orta
                     </label>
@@ -226,10 +256,10 @@ const Order = () => {
                       <input
                         className="radio"
                         type="radio"
-                        id="boyut"
+                        id="buyuk"
                         name="boyut"
                         value="buyuk"
-                        onChange={handleBoyutChange}
+                        onChange={handleChangeBoyut}
                       />
                       Büyük
                     </label>
@@ -239,73 +269,64 @@ const Order = () => {
 
                 <div className="select-pizza-size">
                   <h5>
-                    Hamur Seç <span>*</span>
+                    Hamur Seç <span style={{ color: "#CE2829" }}>*</span>
                   </h5>
                   <select
                     id="size-dropdown"
                     name="kalinlik"
                     defaultValue="none"
-                    onChange={handleBoyutChange}
+                    onChange={handleChangeBoyut}
                   >
                     <option value="none" disabled>
                       Hamur Kalınlığı:
                     </option>
-                    <option type="option" value="kucuk">
-                      İnce
-                    </option>
-                    <option type="option" value="normal">
-                      Normal
-                    </option>
-                    <option type="option" value="kalın">
-                      Kalın
-                    </option>
+                    <option value="ince">İnce</option>
+                    <option value="normal">Normal</option>
+                    <option value="kalın">Kalın</option>
                   </select>
                   {formErrors.kalinlik && <h6> {formErrors.kalinlik} </h6>}
                 </div>
               </div>
             </div>
-            {/*checkbox*/}
             <div className="form-extra">
               <div className="form-extra-details">
                 <h5>Ek Malzemeler</h5>
-                <p>En fazla 10 ürün seçebilirsiniz. 5₺ </p>
+                <p>En fazla 10 ürün seçebilirsiniz. 5₺</p>
               </div>
               <div className="form-extra-list">
-                {ekMalzeme.map((item, index) => {
-                  return (
-                    <div key={index}>
-                      <label>
-                        <input
-                          className="checkbox"
-                          type="checkbox"
-                          name="extra_materials"
-                          disabled={
-                            secilenEkMalzeme.length === 10 &&
-                            !secilenEkMalzeme.includes(item)
-                          }
-                          value={item}
-                          onChange={handleBoyutChangeExtras}
-                        />
-                        {item}
-                      </label>
-                    </div>
-                  );
-                })}
+                {ekMalzeme.map((item, index) => (
+                  <div key={index}>
+                    <label>
+                      <input
+                        className="checkbox"
+                        type="checkbox"
+                        name="extra_materials"
+                       /*  disabled={
+                          secilenEkMalzeme.length === 11 &&
+                          !secilenEkMalzeme.includes(item)
+                        } */
+                        value={item}
+                        onChange={handleChangeExtras}
+                      />
+                      {item}
+                    </label>
+                  </div>
+                ))}
               </div>
+              {formErrors.extra_materials && (
+                <h6> {formErrors.extra_materials} </h6>)}
             </div>
-
-            {/* isim, notlar */}
 
             <div className="form-text">
               <label className="musteri-ismi">
                 <h5>İsim</h5>
-                <textarea
+                <input
                   className="rounded"
                   type="text"
                   id="name-input"
                   placeholder="Min. 2 karakter içermeli"
                   name="name"
-                  onChange={handleBoyutChange}
+                  onChange={handleChangeBoyut}
                 />
               </label>
               {formErrors.name && <h6>{formErrors.name}</h6>}
@@ -314,25 +335,23 @@ const Order = () => {
                 <h5>Sipariş Notu</h5>
                 <textarea
                   className="rounded"
-                  type="text-area"
                   id="special-text"
                   placeholder="Siparişine eklemek istediğin bir not var mı?"
                   name="note"
-                  onChange={handleBoyutChange}
+                  onChange={handleChangeBoyut}
                 />
               </label>
               {formErrors.note && <h6>{formErrors.note}</h6>}
             </div>
 
             <hr />
-            {/* adet*/}
             <div className="form-change-number">
               <div className="form-change-numberof">
                 <button
                   className="decrease-button"
                   type="button"
                   id="decrease"
-                  onClick={handleBoyutChangeCounter}
+                  onClick={handleChangeCounter}
                   disabled={pizzaSiparis === 0}
                 >
                   -
@@ -342,7 +361,7 @@ const Order = () => {
                   className="increase-button"
                   type="button"
                   id="increase"
-                  onClick={handleBoyutChangeCounter}
+                  onClick={handleChangeCounter}
                   disabled={pizzaSiparis === 0}
                 >
                   +

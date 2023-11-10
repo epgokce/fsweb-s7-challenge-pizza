@@ -1,16 +1,53 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow&family=Quattrocento&family=Satisfy&display=swap');
 
 
-.success {
-    background-color: #CE2829;
-    width: 100%;
-    height: 100vh;
-    padding-top: 16rem;
+body {
+    font-family: "Barlow", sans-serif;
+    margin: 0;
+  }
+  
+  
+  .success {
+    min-height: 100vh;
+    background-color: #ce2829;
+    padding-top: 15rem; /* 64px / 16px = 4rem */
     text-align: center;
+    color: white;
+  }
+  
+  .order-details {
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin: 1em auto 5em auto;
+    max-width: 50em;
     
-
-}
-.success p {
-font-size: 3rem;
-font-family: 'Barlow';
-}
+  }
+  
+  
+  .pagewidth {
+    max-width: 50%;
+    margin: 0 auto;
+  }
+  
+  
+  .pizzaSelection {
+    color: #faf7f2;
+    width: 30%;
+    margin: 0 auto;
+  }
+  
+  .pizzaTotal {
+    color: #faf7f2;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 2px #faf7f2 solid;
+    border-radius: 6px;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1em;
+  }
+  
+  .bold {
+    font-weight: bold;
+  }
